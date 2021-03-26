@@ -13,7 +13,7 @@
 * make virtualenv
 * install requirements
 * edit config.ini
-> python3 oanda-monitor.py
+* run `python3 oanda-monitor.py`
 
 ## Installation and Configuration
 
@@ -46,5 +46,5 @@ token = ; leave empty for now
 
 ## Supporting
 Express your thanks in donations:
-BTC: 33yxi4U5qYrXHUE1DHFoQchGTecZJ4hA3W
-ETH: 0x5f6Ee50bE65e143776ff6efB23bFedDF5c37b0B9
+* BTC: 33yxi4U5qYrXHUE1DHFoQchGTecZJ4hA3W
+* ETH: 0x5f6Ee50bE65e143776ff6efB23bFedDF5c37b0B9
