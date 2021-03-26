@@ -14,11 +14,6 @@ discord_url = config["oanda"]["discord_url"]
 
 data = {
     'api_key': '0325ee6232373738',
-    'client_type': 'MOBILE',
-    'client_version': '5.7.1325',
-    'device_type': 'iPad8,11',
-    'device_version': 'iPad8,11',
-    'operating_system': '14.4',
     'password': password,
     'username': user
 }
@@ -34,9 +29,9 @@ to_drop = ['guaranteedStopLossOrderMode','alias','createdTime',\
            'openPositionCount','pendingOrderCount','marginUsed',\
            'dividendAdjustment','guaranteedExecutionFees',\
            'unrealizedPL','pl','resettablePL','resettablePLTime',\
-           'financing','commission','currency']
+           'financing','commission','currency']#,'lastTransactionID']
 
-to_rename = {'lastTransactionID':'tx#','balance':'bal$','NAV':'NAV$'}           
+to_rename = {'lastTransactionID':'txn#','balance':'bal$','NAV':'NAV$'}           
 
 
 
