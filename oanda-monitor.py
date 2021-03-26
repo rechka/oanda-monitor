@@ -4,11 +4,10 @@ from discord_webhook import DiscordWebhook
 import pandas as pd
 import json
 
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 login = config["oanda"]["login"]
 password = config["oanda"]["password"]
-apikey = config["oanda"]["apikey"]
 token = config["oanda"]["token"]
 discord_url = config["oanda"]["discord_url"]
 
@@ -24,10 +23,10 @@ to_drop = ['guaranteedStopLossOrderMode','alias','createdTime',\
            'unrealizedPL','pl','resettablePL','resettablePLTime',\
            'financing','commission','currency']
 
-to_rename = {'currency':'cur','lastTransactionID':'txn'}           
+to_rename = {'lastTransactionID':'tx#','balance':'bal$','NAV':'NAV$'}           
 
 data = {
-  'api_key': apikey,
+  'api_key': '0325ee6232373738',
   'api_sig': '',
   'client_type': 'MOBILE',
   'client_version': '5.7.1325',
@@ -56,6 +55,8 @@ with requests.Session() as s:
 
         headers = {'Authorization': f'Bearer {config["oanda"]["token"]}'}
         r1 = s.get('https://api-fxtrade.oanda.com/v3/users/@/accounts', headers=headers)
+        #print(r1.status_code, r1.text)
+
         if r1.status_code == 200:
             message = ''
             accounts = [account['id'] for account in r1.json()['accounts']]# if 'HEDGING' in account['tags']]
@@ -67,11 +68,10 @@ with requests.Session() as s:
                     stats.append(summary)
 
 df = pd.DataFrame.from_records(stats,exclude=to_drop,index='id')
+df = df.astype(float)
+df = df.append(df.sum(numeric_only=True).rename('totals'))
+
+df = df[(df.balance != 0) | (df.NAV != 0)]
 df.rename(to_rename,axis=1,inplace=True)
-df = df.astype({'balance':'float','NAV':'float','txn':'int'})
-df = df.astype({'balance':'int','NAV':'int'})
-df = df.append(df.sum(numeric_only=True).rename(u'\u03a3'))
 
-df = df[(df.balance != 0) & (df.NAV != 0)]
-send_discord("```"+df.to_markdown(tablefmt="github")+"```")
-
+send_discord(config["oanda"]["login"][:5] + " " + ", ".join(f'{column}: {df.loc["totals", column]:0.0f}' for column in df.columns))

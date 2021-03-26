@@ -1,0 +1,5 @@
+[oanda]
+login = <email>
+password = <password>
+discord_url = https://<discord webhook url>
+
