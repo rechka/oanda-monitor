@@ -1,3 +1,5 @@
+import os
+from twilio.rest import Client
 import requests
 import configparser
 from discord_webhook import DiscordWebhook
@@ -10,7 +12,10 @@ user = config["oanda"]["login"]
 password = config["oanda"]["password"]
 token = config["oanda"]["token"]
 discord_url = config["oanda"]["discord_url"]
-
+account_sid = config["oanda"]["account_sid"]
+auth_token = config["oanda"]["auth_token"]
+recipient = config["oanda"]["to"]
+sender = config["oanda"]["from"]
 
 data = {
     'api_key': '0325ee6232373738',
@@ -78,6 +83,16 @@ def parse_accounts(session,accounts,headers):
     
 
     return inform(stats)
+
+def send_text(content):
+
+    client = Client(account_sid, auth_token)
+
+    message = client.messages \
+      .create(
+             from_=f'whatsapp:{sender}',
+             body=content,
+             to=f'whatsapp:{recipient}')
             
 
 def inform(stats):
@@ -88,7 +103,11 @@ def inform(stats):
     df = df[(df.balance != 0) | (df.NAV != 0)]
     df.rename(to_rename,axis=1,inplace=True)
 
-    return send_discord(user[:5] + " " + ", ".join(f'{column}: {df.loc["totals", column]:0.0f}' for column in df.columns))
+    message = user[:5] + " " + ", ".join(f'{column}: {df.loc["totals", column]:0.0f}' for column in df.columns)
+    
+    send_text(message)
+    return send_discord(message)
+
 
 def main():
     with requests.Session() as s:
