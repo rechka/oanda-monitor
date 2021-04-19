@@ -103,7 +103,12 @@ def inform(stats):
     df = df[(df.balance != 0) | (df.NAV != 0)]
     df.rename(to_rename,axis=1,inplace=True)
 
-    message = user[:5] + " " + ", ".join(f'{column}: {df.loc["totals", column]:0.0f}' for column in df.columns)
+    txntot = df.loc["totals", "txn#"]
+    baltot = df.loc["totals", "bal$"]
+    navtot = df.loc["totals", "NAV$"]
+    wcap = (baltot-navtot)/baltot
+
+    message = f'{user[:5]} txn#: {txntot:0.0f}, bal$: {baltot:0.0f}, NAV$: {navtot:0.0f}, Wcap: {wcap:0.0%}'
     
     send_text(message)
     return send_discord(message)
