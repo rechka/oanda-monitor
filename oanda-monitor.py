@@ -34,7 +34,7 @@ to_drop = ['guaranteedStopLossOrderMode','alias','createdTime',\
            'openPositionCount','pendingOrderCount','marginUsed',\
            'dividendAdjustment','guaranteedExecutionFees',\
            'unrealizedPL','pl','resettablePL','resettablePLTime',\
-           'financing','commission','currency']#,'lastTransactionID']
+           'financing','commission','currency','marginCallEnterTime']#,'lastTransactionID']
 
 to_rename = {'lastTransactionID':'txn#','balance':'bal$','NAV':'NAV$'}           
 
