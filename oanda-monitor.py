@@ -34,7 +34,9 @@ to_drop = ['guaranteedStopLossOrderMode','alias','createdTime',\
            'openPositionCount','pendingOrderCount','marginUsed',\
            'dividendAdjustment','guaranteedExecutionFees',\
            'unrealizedPL','pl','resettablePL','resettablePLTime',\
-           'financing','commission','currency','marginCallEnterTime']#,'lastTransactionID']
+           'financing','commission','currency']#,'lastTransactionID']
+
+to_drop_opt = ['marginCallEnterTime']
 
 to_rename = {'lastTransactionID':'txn#','balance':'bal$','NAV':'NAV$'}           
 
@@ -97,6 +99,7 @@ def send_text(content):
 
 def inform(stats):
     df = pd.DataFrame.from_records(stats,exclude=to_drop,index='id')
+    df = df.drop(to_drop_opt, axis=1, errors='ignore')
     df = df.astype(float)
     df = df.append(df.sum(numeric_only=True).rename('totals'))
 
