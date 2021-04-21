@@ -1,10 +1,10 @@
 import os
-from twilio.rest import Client
 import requests
 import configparser
 from discord_webhook import DiscordWebhook
 import pandas as pd
 import sys
+import ujson
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
@@ -86,17 +86,6 @@ def parse_accounts(session,accounts,headers):
 
     return inform(stats)
 
-def send_text(content):
-
-    client = Client(account_sid, auth_token)
-
-    message = client.messages \
-      .create(
-             from_=f'whatsapp:{sender}',
-             body=content,
-             to=f'whatsapp:{recipient}')
-            
-
 def inform(stats):
     df = pd.DataFrame.from_records(stats,exclude=to_drop,index='id')
     df = df.drop(to_drop_opt, axis=1, errors='ignore')
@@ -113,7 +102,6 @@ def inform(stats):
 
     message = f'{user[:5]} txn#: {txntot:0.0f}, bal$: {baltot:0.0f}, NAV$: {navtot:0.0f}, Wcap: {wcap:0.0%}'
     
-    send_text(message)
     return send_discord(message)
 
 
