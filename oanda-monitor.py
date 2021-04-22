@@ -1,6 +1,5 @@
 import requests
 import configparser
-import sys
 import ujson
 
 config = configparser.ConfigParser(allow_no_value=True)
@@ -40,7 +39,7 @@ def send_discord(content):
     if r3.status_code in [200, 204]:
         return True
     else:
-        sys.exit(f'{r3.status_code}, {r3.text}')
+        print(f'{r3.status_code}, {r3.text}')
 
 
 def get_accounts(session, token):
@@ -62,7 +61,7 @@ def login(session, cfg):
             cfg.write(configfile)
         return True
     else:
-        sys.exit(f'{r0.status_code}, {r0.text}')
+        print(f'{r0.status_code}, {r0.text}')
 
 def parse_accounts(session,accounts,headers):
     stats = {}
@@ -75,7 +74,7 @@ def parse_accounts(session,accounts,headers):
             for k, v in summary.items(): 
                 stats[k] += float(v)   
         else:
-            sys.exit(f'{r2.status_code}, {r2.text}')
+            print(f'{r2.status_code}, {r2.text}')
 
     return inform(stats)
 
@@ -93,14 +92,11 @@ def main():
     with requests.Session() as s:
         token = config["oanda"]["token"]
 
-        if get_accounts(s, token):
-            sys.exit(0)
-        else: 
+        if not get_accounts(s, token):
             if login(s, config):
                 config.read("config.ini")
                 token = config["oanda"]["token"]
-                if get_accounts(s,token):
-                    sys.exit(0)
+                return get_accounts(s,token)
 
 if __name__ == "__main__":
     main()
