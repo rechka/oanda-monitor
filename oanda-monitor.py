@@ -1,6 +1,5 @@
 import requests
 import configparser
-from discord_webhook import DiscordWebhook
 import sys
 import ujson
 
@@ -10,10 +9,6 @@ user = config["oanda"]["login"]
 password = config["oanda"]["password"]
 token = config["oanda"]["token"]
 discord_url = config["oanda"]["discord_url"]
-account_sid = config["oanda"]["account_sid"]
-auth_token = config["oanda"]["auth_token"]
-recipient = config["oanda"]["to"]
-sender = config["oanda"]["from"]
 
 data = {
     'api_key': '0325ee6232373738',
@@ -41,8 +36,7 @@ to_rename = {'lastTransactionID':'txn#','balance':'bal$','NAV':'NAV$'}
 
 
 def send_discord(content):
-    webhook = DiscordWebhook(url=config["oanda"]["discord_url"], content=content)
-    r3 = webhook.execute()
+    r3 = requests.post(url=discord_url, json={"content":content})
     if r3.status_code in [200, 204]:
         return True
     else:
