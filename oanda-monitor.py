@@ -1,8 +1,6 @@
-import os
 import requests
 import configparser
 from discord_webhook import DiscordWebhook
-import pandas as pd
 import sys
 import ujson
 
@@ -24,7 +22,7 @@ data = {
 }
 
 
-to_drop = ['guaranteedStopLossOrderMode','alias','createdTime',\
+to_drop = ['id','guaranteedStopLossOrderMode','alias','createdTime',\
            'createdByUserID','hedgingEnabled','marginRate',\
            'marginCloseoutPercent','withdrawalLimit',\
            'marginCallMarginUsed','marginCallPercent',\
@@ -73,34 +71,26 @@ def login(session, cfg):
         sys.exit(f'{r0.status_code}, {r0.text}')
 
 def parse_accounts(session,accounts,headers):
-    stats = []
+    stats = {}
+    for k in to_rename.keys(): stats[k] = 0.0
     for account in accounts:
         r2 = session.get(f'https://api-fxtrade.oanda.com/v3/accounts/{account}/summary', headers=headers)
         if r2.status_code == 200:
-            summary = r2.json()['account']
-            summary['id'] = summary['id'][-2:]
-            stats.append(summary)
+            summary = ujson.loads(r2.text)['account']
+            for key in to_drop: del summary[key]
+            for k, v in summary.items(): 
+                stats[k] += float(v)   
         else:
             sys.exit(f'{r2.status_code}, {r2.text}')
-    
 
     return inform(stats)
 
 def inform(stats):
-    df = pd.DataFrame.from_records(stats,exclude=to_drop,index='id')
-    df = df.drop(to_drop_opt, axis=1, errors='ignore')
-    df = df.astype(float)
-    df = df.append(df.sum(numeric_only=True).rename('totals'))
 
-    df = df[(df.balance != 0) | (df.NAV != 0)]
-    df.rename(to_rename,axis=1,inplace=True)
+    
+    wcap = (stats['balance']-stats['NAV'])/stats['balance']
 
-    txntot = df.loc["totals", "txn#"]
-    baltot = df.loc["totals", "bal$"]
-    navtot = df.loc["totals", "NAV$"]
-    wcap = (baltot-navtot)/baltot
-
-    message = f'{user[:5]} txn#: {txntot:0.0f}, bal$: {baltot:0.0f}, NAV$: {navtot:0.0f}, Wcap: {wcap:0.0%}'
+    message = f'{user[:5]} txn#: {stats["lastTransactionID"]:0.0f}, bal$: {stats["balance"]:0.0f}, NAV$: {stats["NAV"]:0.0f}, Wcap: {wcap:0.0%}'
     
     return send_discord(message)
 
