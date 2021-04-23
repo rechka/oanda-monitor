@@ -71,6 +71,10 @@ def parse_accounts(session,accounts,headers):
         if r2.status_code == 200:
             summary = ujson.loads(r2.text)['account']
             for key in to_drop: del summary[key]
+            try:
+                for key in to_drop_opt: del summary[key]
+            except:
+                pass
             for k, v in summary.items(): 
                 stats[k] += float(v)   
         else:
